@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticky Notes</title>
+</head>
+
+<body style="
+font-family: Arial, sans-serif;
+min-height:100vh;
+margin:0;
+padding:40px;
+background:linear-gradient(135deg,#0f172a,#020617);
+color:white;
+">
+
+<!-- HEADER -->
+<div style="text-align:center;margin-bottom:30px;">
+<h1 style="color:#facc15;">📌 Sticky Notes</h1>
+</div>
+
+<!-- INPUT -->
+<div style="
+display:flex;
+justify-content:center;
+gap:10px;
+margin-bottom:20px;
+flex-wrap:wrap;
+">
+
+<input id="noteInput" placeholder="Write a note..."
+style="
+padding:12px 16px;
+border-radius:10px;
+border:none;
+width:260px;
+font-size:1rem;
+">
+
+<button onclick="addNote()"
+style="
+padding:12px 20px;
+background:#facc15;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+">
+Add Note
+</button>
+
+</div>
+
+<!-- COLOR PICKER -->
+
+<div style="
+display:flex;
+justify-content:center;
+gap:10px;
+margin-bottom:25px;
+">
+
+<div onclick="selectColor('yellow',this)" id="dot-yellow"
+style="width:24px;height:24px;border-radius:50%;background:#fef08a;border:3px solid white;cursor:pointer;"></div>
+
+<div onclick="selectColor('green',this)" id="dot-green"
+style="width:24px;height:24px;border-radius:50%;background:#bbf7d0;border:3px solid transparent;cursor:pointer;"></div>
+
+<div onclick="selectColor('blue',this)" id="dot-blue"
+style="width:24px;height:24px;border-radius:50%;background:#bae6fd;border:3px solid transparent;cursor:pointer;"></div>
+
+<div onclick="selectColor('pink',this)" id="dot-pink"
+style="width:24px;height:24px;border-radius:50%;background:#fecdd3;border:3px solid transparent;cursor:pointer;"></div>
+
+<div onclick="selectColor('purple',this)" id="dot-purple"
+style="width:24px;height:24px;border-radius:50%;background:#e9d5ff;border:3px solid transparent;cursor:pointer;"></div>
+
+<div onclick="selectColor('orange',this)" id="dot-orange"
+style="width:24px;height:24px;border-radius:50%;background:#fed7aa;border:3px solid transparent;cursor:pointer;"></div>
+
+</div>
+
+<!-- BOARD -->
+
+<div id="board"
+style="
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:30px;
+max-width:1000px;
+margin:auto;
+">
+</div>
+
+<script>
+
+const colorMap = {
+yellow:'#fef08a',
+green:'#bbf7d0',
+blue:'#bae6fd',
+pink:'#fecdd3',
+purple:'#e9d5ff',
+orange:'#fed7aa'
+}
+
+let notes = JSON.parse(localStorage.getItem("sticky-notes")) || []
+let selectedColor="yellow"
+
+renderNotes()
+
+function selectColor(color,el){
+
+selectedColor=color
+
+Object.keys(colorMap).forEach(c=>{
+document.getElementById("dot-"+c).style.border="3px solid transparent"
+})
+
+el.style.border="3px solid white"
+
+}
+
+function addNote(){
+
+const input=document.getElementById("noteInput")
+const text=input.value.trim()
+
+if(!text) return
+
+notes.push({
+id:Date.now(),
+text:text,
+color:selectedColor,
+time:new Date().toLocaleString()
+})
+
+localStorage.setItem("sticky-notes",JSON.stringify(notes))
+
+input.value=""
+
+renderNotes()
+
+}
+
+document.getElementById("noteInput").addEventListener("keydown",e=>{
+if(e.key==="Enter") addNote()
+})
+
+function deleteNote(id){
+
+notes=notes.filter(n=>n.id!==id)
+
+localStorage.setItem("sticky-notes",JSON.stringify(notes))
+
+renderNotes()
+
+}
+
+function editNote(id){
+
+const note=notes.find(n=>n.id===id)
+
+const newText=prompt("Edit note",note.text)
+
+if(!newText) return
+
+note.text=newText
+
+localStorage.setItem("sticky-notes",JSON.stringify(notes))
+
+renderNotes()
+
+}
+
+function renderNotes(){
+
+const board=document.getElementById("board")
+
+board.innerHTML=""
+
+notes.forEach(note=>{
+
+const bg=colorMap[note.color]
+
+const card=document.createElement("div")
+
+card.style.cssText=`
+background:
+url('note.png') center/contain no-repeat,
+${bg};
+background-blend-mode:multiply;
+padding:40px 20px 60px 20px;
+min-height:200px;
+position:relative;
+font-size:1.2rem;
+color:#1a1a1a;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+transform:rotate(${Math.random()*6-3}deg);
+`
+
+card.innerHTML=`
+
+<div style="
+font-size:0.7rem;
+opacity:0.6;
+margin-bottom:10px;
+">
+${note.time}
+</div>
+
+<div style="
+line-height:1.4;
+margin-bottom:20px;
+">
+${note.text}
+</div>
+
+<div style="
+position:absolute;
+bottom:10px;
+right:10px;
+display:flex;
+gap:6px;
+">
+
+<button onclick="editNote(${note.id})"
+style="
+padding:4px 10px;
+border:none;
+border-radius:6px;
+background:#3b82f6;
+color:white;
+font-size:0.75rem;
+cursor:pointer;
+">
+Edit
+</button>
+
+<button onclick="deleteNote(${note.id})"
+style="
+padding:4px 10px;
+border:none;
+border-radius:6px;
+background:#ef4444;
+color:white;
+font-size:0.75rem;
+cursor:pointer;
+">
+Delete
+</button>
+
+</div>
+`
+
+board.appendChild(card)
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
