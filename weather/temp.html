@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weather Dashboard</title>
+    <style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(135deg,#4d5154,#6aadf6);
+  color:white;
+}
+
+h1{
+  margin-bottom:20px;
+  font-size:36px;
+  letter-spacing:1px;
+}
+
+button{
+  padding:12px 25px;
+  font-size:16px;
+  border:none;
+  border-radius:25px;
+  background:rgb(48, 67, 161);
+  color: white;
+  cursor:pointer;
+  transition:0.3s;
+  margin-bottom:30px;
+}
+
+button:hover{
+  background:#176ed1;
+  color:black;
+  transform:scale(1.05);
+}
+
+.container{
+  display:flex;
+  gap:25px;
+}
+
+.card{
+  width:180px;
+  height:120px;
+  background:rgba(118, 131, 149, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  box-shadow:0 8px 20px rgba(0,0,0,0.4);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 12px 25px rgba(0,0,0,0.3);
+}
+</style>
+    
+  </head>
+
+  <body>
+    <h1>Weather Dashboard</h1>
+
+    <button id="btn">Get Weather</button>
+
+    <div class="container">
+      <div class="card" id="delhi">Delhi</div>
+      <div class="card" id="mumbai">Mumbai</div>
+      <div class="card" id="bangalore">Bangalore</div> 
+    </div>
+  </body>
+  <script>
+    const btn = document.getElementById("btn");
+
+    btn.addEventListener("click", getWeather);
+
+    function getWeather() {
+      const delhi = fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=28.61&longitude=77.23&current_weather=true",
+      );
+      const mumbai = fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=19.07&longitude=72.87&current_weather=true",
+      );
+      const bangalore = fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=12.97&longitude=77.59&current_weather=true",
+      );
+
+      Promise.all([delhi, mumbai, bangalore]) 
+        .then((responses) => {
+          return Promise.all(responses.map((res) => res.json()));
+        })
+        .then((data) => {
+          const [delhiData, mumbaiData, bangaloreData] = data;
+
+          document.getElementById("delhi").innerHTML =
+            `Delhi <br> 🌡 ${delhiData.current_weather.temperature}°C`;
+
+          document.getElementById("mumbai").innerHTML =
+            `Mumbai <br> 🌡 ${mumbaiData.current_weather.temperature}°C`;
+
+          document.getElementById("bangalore").innerHTML =
+            `Bangalore <br> 🌡 ${bangaloreData.current_weather.temperature}°C`;
+        })
+        .catch((err) => {
+          console.log("Error:", err);
+        });
+    }
+  </script>
+</html>
